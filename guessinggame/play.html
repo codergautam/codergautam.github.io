@@ -150,7 +150,7 @@
     function setWord() {
         /*
         return new Promise((fulfil, reject) => {
-        fetch("getword.php?difficulty="+difficulty).then(res=>{
+        fetch("getword.php?difficulty="+difficulty).(res=>{
             res.text().then(word=>{
                 theWord = word;
                 fulfil()
@@ -221,7 +221,7 @@ theWord = wordlist[Math.floor(Math.random() * wordlist.length)];
     
     function afterCount() {
     setWord()
-    .then(() => {
+   // .then(() => {
     
     
          triesRemaining = difficulty==1?16:difficulty==2?12:8
@@ -229,7 +229,7 @@ theWord = wordlist[Math.floor(Math.random() * wordlist.length)];
         hide("countdown")
         gameState = 3;
         game()
-    })
+ //   })
     }
     $(document).keypress(function(e){
         var myElement = getElem('guess-word');
