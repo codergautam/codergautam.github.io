@@ -1,0 +1,319 @@
+
+
+
+<html><head> <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" /> <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script><title>Guessing Game- In Game</title><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+      </head><body>
+          <style>
+                          .input{
+                margin-bottom: 50;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                border: 1px solid grey;
+                border-radius: 35px;
+                padding-left: 25px;
+                padding-right: 25px;
+                padding-top: 35px;
+                padding-bottom: 25px;
+                background-color: white;
+                }
+                .nav {
+                     background-color: white;
+                }
+    
+                body {
+                    background-color: cyan;
+                }
+              </style>
+              <div class="nav">
+        <img src="LogoMakr-7hm9Gd.png" height="75" width="75"><a href="index.php" onclick="return home();"id="leavegame"><img id="leavegame" class="pull-right" src="https://image.flaticon.com/icons/svg/60/60577.svg" height="40" width="80"></a>
+              </div>
+        <hr> 
+        <center>
+         <div class="container input">
+        
+        <div class="container-sm" id="difficulty">
+        <h1>Select difficulty</h1>
+        <br>
+    <button id="easy" style="width:100px;" class="btn btn-primary">Easy</button>
+    <br><br>
+    <button id="med" style="width:100px;" class="btn btn-primary">Medium</button>
+    <br><br>
+    <button id="hard" style="width:100px;" class="btn btn-primary">Hard</button>
+    </div>
+    
+        
+        <div class="container-sm" id="countdown" style="display: none;">
+        <h1 id="count">3</h1>
+        </div>
+      
+        <div class="container-sm" id="game" style="display: none;">
+         <div id="tries-div">
+                <h3>Tries remaining:</h3>
+                <br>
+                <h1 id="tries-display"></h1>
+            </div>
+            <br>
+            <div id="word-div">
+                <h1 id="word-display"></h1>
+            </div>
+            <br>
+            <div id="options-div">
+                <div id="letter-btns">
+                    <!-- Buttons will be dynamically added here by javascript-->
+                </div>
+                <br>
+            </div>
+            <br>
+            <br>
+            <div id="guess-div">
+                <label id="guess-msg"></label>
+    
+                <input type="text" id="guess-word" placeholder="Guess the entire word">
+                <button id="guess-btn">Guess</button>
+            </div>
+            <div id="lose-div" style="display: none;">
+                <h2>You lost!</h2>
+                <br>
+                <h3 id="lose-message"></h3>
+                <br>
+                <button class="btn btn-primary" onclick="location.reload()">Play again</button>
+            </div>
+            <div id="win-div" style="display: none;">
+                <h2>You won!</h2>
+                <br>
+                <h3 id="win-message"></h3>
+                <br>
+                <button class="btn btn-primary" onclick="location.reload()">Play again</button>
+            </div>
+        </div>
+        </center>
+    <script>
+        (function() {
+    
+    
+    
+    
+    /*Game states
+    1 = awaiting start
+    2 = countdown
+    3 = game started
+    4 = game ended
+    */
+    var gameState = 1
+    
+    /*difficulties
+    1 = easy
+    2 = medium
+    3 = hard
+    */
+    var theWord = null;
+    var triesRemaining = null;
+    var difficulty = 1;
+    var guessed = [];
+    function getElem(id) {
+        return document.getElementById(id);
+    }
+    
+    function home() {
+        if(gameState ==1) return true;
+        location.reload();
+        return false;
+    }
+    function hide(id) {
+        return getElem(id).style.display = "none";
+    }
+    
+    function show(id) {
+        return getElem(id).style.display = "";
+    }
+    function setGameDisplay(b) {
+        var x = b ? show : hide
+        x("tries-div")
+        x("word-div")
+        x("options-div")
+        x("tries-div")
+        x("guess-div")
+    }
+    function selectdif(d) {
+        if(gameState == 1) {
+        difficulty = d;
+        gameState = 2;
+        countdown()
+        }
+    }
+    function setWord() {
+        /*
+        return new Promise((fulfil, reject) => {
+        fetch("getword.php?difficulty="+difficulty).then(res=>{
+            res.text().then(word=>{
+                theWord = word;
+                fulfil()
+            })
+        })
+        }) */
+        if(difficulty == 1) {
+    wordlist = ["people", "game", "water", "apple", "fruit", "funny", "month", "day", "star", "night", "play", "friend", "office", "banana"];
+} else if (difficulty == 2) {
+    wordlist = ["business", "service", "application", "wandering", "youtuber", "moment", "galaxies"];
+} else {
+    wordlist = ["literally", "irregardless", "disinterested", "nonplussed", "squirrel", "embarrass", "consensus"];
+}
+theWord = wordlist[Math.floor(Math.random() * wordlist.length)];
+    
+    }
+    function renderTries(t) {
+        getElem("tries-display").innerHTML = t
+    }
+    function renderWord(theWord, guessed) {
+        var result = "";
+        [...theWord].forEach(char => result += guessed.includes(char) ? char : "_" + " ")
+        getElem("word-display").innerHTML = result;
+    }
+    function disable(id, correct) {
+        getElem(id).disabled = true;
+        getElem(id).style.backgroundColor = correct?"lime":"red"
+    }
+    function isLetter(str) {
+      return str.length === 1 && str.match(/[a-z]/i);
+    }
+    function renderButtons(div) {
+        for (var i = 0; i <= 25; i++) {
+            var button = document.createElement("BUTTON");
+            button.innerHTML = String.fromCharCode(97 + i);
+            button.id = String.fromCharCode(97 + i);
+          button.onclick = function() {
+              letterClicked(this.id)
+          }
+            div.appendChild(button);
+        }
+    }
+    let checkWin = (guessed, theWord) => {
+        e = Array.from(theWord);
+        return e.every(char => guessed.includes(char))
+    };
+    function countdown() {
+        hide("difficulty")
+        show("countdown")
+    gameState = 2;
+    setTimeout(function(){
+    getElem("count").innerHTML = "2"
+    setTimeout(function(){
+    getElem("count").innerHTML = "1"
+    setTimeout(function(){
+    getElem("count").innerHTML = "Go!"
+    setTimeout(function(){
+    //do stuff
+    afterCount()
+    },1000)
+    
+    },1000)
+    
+    },1000)
+    
+    },1000)
+    }
+    
+    function afterCount() {
+    setWord()
+    .then(() => {
+    
+    
+         triesRemaining = difficulty==1?16:difficulty==2?12:8
+         triesTotal = triesRemaining+1;
+        hide("countdown")
+        gameState = 3;
+        game()
+    })
+    }
+    $(document).keypress(function(e){
+        var myElement = getElem('guess-word');
+    if(myElement === document.activeElement) return;
+        if(gameState == 3 && e.key != " " && isLetter(e.key.toLowerCase())) {
+            if(getElem(e.key.toLowerCase()).disabled) return;
+            letterClicked(e.key.toLowerCase())
+        }
+    })
+    
+    function game() {
+        show("game")
+        renderButtons(getElem("letter-btns"))
+        renderTries(triesRemaining)
+        renderWord(theWord, [])
+    }
+    
+    getElem("guess-btn").onclick = function() {
+        word = getElem("guess-word").value.toLowerCase().trim()
+        if(word != "") {
+        if (word == theWord) {
+            //guessed correctly
+            setGameDisplay(false)
+            show("win-div")
+            getElem("win-message").innerHTML = `Nice job!<br>You guessed the word in ${triesTotal-triesRemaining} tries!<br>The word was <b><u>${theWord}</u></b>`
+        } else {
+            //guessed wrong
+            if (triesRemaining == 1) {
+                setGameDisplay(false)
+                show("lose-div")
+                getElem("lose-message").innerHTML = "The word was <u><b>" + theWord +"</u></b>"
+            } else {
+                triesRemaining -= 1;
+                renderTries(triesRemaining)
+                getElem("guess-word").value = "";
+                getElem("guess-msg").innerHTML = "Incorrect word.<br>"
+                setTimeout(() => {
+    getElem("guess-msg").innerHTML = ""
+                }, 2000)
+            }
+        }
+        }
+    }
+    
+    function letterClicked(l) {
+        guessed[guessed.length] = l;
+        renderWord(theWord, guessed)
+        
+        if (!theWord.includes(l)) {
+            disable(l, false)
+            //incorrect
+            if (triesRemaining == 1) {
+                setGameDisplay(false)
+                show("lose-div")
+                getElem("lose-message").innerHTML = "The word was " + theWord
+            } else {
+                triesRemaining -= 1;
+                renderTries(triesRemaining)
+            }
+        } else {
+            disable(l, true)
+            if (checkWin(guessed, theWord)) {
+                setGameDisplay(false)
+                show("win-div")
+                getElem("win-message").innerHTML = `Nice job!<br>You guessed the word in ${triesTotal-triesRemaining} tries!<br>The word was <b><u>${theWord}</u></b>`
+    
+            }
+        }
+    }
+    $("#easy").click(function() { selectdif(1) });
+    $("#med").click(function() { selectdif(2) });
+    $("#hard").click(function() { selectdif(3) });
+    })();
+    
+    </script><style>
+                img{margin-left: 30px; margin-top: 15px; margin-bottom: 15px;}
+               @media (max-width: @screen-xs) {
+        body{font-size: 10px;}
+    }
+    
+    @media (max-width: @screen-sm) {
+        body{font-size: 14px;}
+    }
+    </style>
+    </div>
+    </html>
+    
